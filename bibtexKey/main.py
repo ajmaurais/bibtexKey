@@ -44,9 +44,9 @@ def main():
         ent['ID'] = fixKey(ent)
 
     if args.ofname == '':
-        ofname = args.if_file
+        ofname = args.in_file
     else:
-        ofname = '{}/{}'.format(os.path.dirname(args.in_file), args.ofname)
+        ofname = args.ofname
 
     print('Writing fixed bibfile to: {}'.format(os.path.basename(ofname)))
     writer = bibtexparser.bwriter.BibTexWriter()
