@@ -4,6 +4,7 @@ import bibtexparser
 import sys
 import os
 from shutil import copy
+from collections import OrderedDict
 
 def splitNames(name_str):
     """
@@ -53,6 +54,9 @@ def main():
     parser.add_argument('-o', '--ofname', default='',
                         help = 'Name of file to write. If this argument is left out, in_file is rewritten.')
 
+    parser.add_argument('-a', '--alphabetize', default=False, action='store_true',
+                        help='Should entries in new bib be alphabetized? Default is false.')
+
     parser.add_argument('-v', '--verbose', choices=[0, 1], default=0, help='Verbose output?')
 
     parser.add_argument('in_file', help = 'Name of file to read.')
@@ -64,7 +68,7 @@ def main():
     with open(args.in_file, 'r') as bibtex_file:
         bibDatabase = bibtexparser.load(bibtex_file)
 
-    new_bib = dict()
+    new_bib = OrderedDict()
     for ent in bibDatabase.entries:
         key = fixKey(ent, args.verbose)
         ent['ID'] = key
@@ -98,6 +102,8 @@ def main():
     # write new db
     print('Writing fixed bibfile to: {}'.format(os.path.basename(ofname)))
     writer = bibtexparser.bwriter.BibTexWriter()
+    if not args.alphabetize:
+        writer.order_entries_by = None
     with open(ofname, 'w') as bibfile:
         bibfile.write(writer.write(db))
 
