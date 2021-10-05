@@ -3,6 +3,7 @@ import argparse
 import bibtexparser
 import sys
 import os
+import re
 from shutil import copy
 from collections import OrderedDict
 
@@ -57,6 +58,9 @@ def main():
     parser.add_argument('-a', '--alphabetize', default=False, action='store_true',
                         help='Should entries in new bib be alphabetized? Default is false.')
 
+    parser.add_argument('-k', '--allKeys', default=False, action='store_true',
+                        help='Remake all keys? By default only those that match the regex "RN[0-9]+" are replaced.')
+
     parser.add_argument('-v', '--verbose', choices=[0, 1], default=0, help='Verbose output?')
 
     parser.add_argument('in_file', help = 'Name of file to read.')
@@ -68,10 +72,14 @@ def main():
     with open(args.in_file, 'r') as bibtex_file:
         bibDatabase = bibtexparser.load(bibtex_file)
 
+    reset_key_re = re.compile(r'RN[0-9]+')
     new_bib = OrderedDict()
     for ent in bibDatabase.entries:
-        key = fixKey(ent, args.verbose)
-        ent['ID'] = key
+        if reset_key_re.match(ent['ID']) or args.allKeys:
+            key = fixKey(ent, args.verbose)
+            ent['ID'] = key
+        else:
+            key = ent['ID']
         if key in new_bib:
             if refEqual(ent, new_bib[key]):
                 if args.verbose:
